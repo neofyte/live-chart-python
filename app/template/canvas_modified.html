@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<title>canvas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/canvasjs.min.js"></script>
+    <script type="text/javascript">
+$(function () {
+
+    var xVal ;
+    var yVal ; 
+
+
+
+    $(document).ready(function () {
+
+        var dps = []; // dataPoints
+
+        var chart = new CanvasJS.Chart("chartContainer",{
+            title :{
+                text: "Live Height Data"
+            },          
+            axisX:{
+            labelAngle: -50,
+            },
+            data: [{
+                type: "line",
+                xValueType: "dateTime",
+                showInLegend: true,
+                name: "fisrt pool",
+                dataPoints: dps
+            }]
+        });
+
+        function dpspush (xVal, yVal){
+            dps.push({
+                x: xVal,
+                y: yVal,
+            });
+            
+
+            if (dps.length > dataLength)
+            {
+                dps.shift();                
+            }
+
+        };
+
+        //xVal = new Date();
+        //yVal = Math.random()*400;
+        var updateInterval = 3000;
+        var dataLength = 20; // number of dataPoints visible at any point
+
+        function requestData() {
+            $.get(
+                '/data',
+                function(group_data) {
+
+                    for (var i = 0; i<group_data.length; i++){
+                        var point = groupdata[i];
+                        var date = new Date(point[0]);
+                        // Get the offset in ms
+                        var offset = date.getTimezoneOffset()*60000;
+                        var dateOffseted = date.setTime(date.getTime()-offset);
+                        var dateCleaned = date.getTime()+offset;
+                        var height = point[1];
+                        var dot = [dateCleaned, height]
+                        dpspush(dateCleaned, height);
+                        console.log(point[0]);
+                        console.log(dot);
+                        chart.render(); 
+                    };
+
+                    
+
+                    setTimeout(requestData, 3000); 
+                }//,
+                //cache: false
+            );
+        };
+
+    }); //document ready
+
+});
+    </script>
+    
+</head>
+
+<body>
+    <div id="chartContainer" style="height: 300px; width:100%;">
+    </div>
+</body>
+</html>
+
+</html>
