@@ -1,12 +1,12 @@
-drop table if exists 3s_pool;
+drop table if exists A___2SPL;
 create table A___2SPL (
     id integer primary key autoincrement,
-    datetime text,
+    datetime text unique,
     height real
 );
-drop table if exists 3n_pool;
+drop table if exists A___2NPL;
 create table A___2NPL (
     id integer primary key autoincrement,
-    datetime text,
+    datetime text unique,
     height real
 );

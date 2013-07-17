@@ -6,7 +6,6 @@ DATABASE='data/poolheight.db'
 DEBUG=True
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template')
-#stc_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
 app = Flask(__name__, template_folder=tmpl_dir)
 app.config.from_object(__name__)
@@ -14,21 +13,21 @@ app.config.from_object(__name__)
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
 
-def select_last_statement(tablename='first_pool', line_number = 1):
-    return '''select * from {0} order by id desc limit {1}'''.format(tablename, line_number)
+def select_last_statement(tablename, line_number):
+    return '''SELECT * FROM {0} ORDER BY ID DESC LIMIT {1}'''.format(tablename, line_number)
 
-def db_query():
+def db_query(table_name):
     g.db = connect_db()
     database_cursor = g.db.cursor()
-    database_cursor.execute(select_last_statement('first_pool', 10))
+    database_cursor.execute(select_last_statement(table_name, 10))
     #data_group is a list whose items are [id, measure_time,height]
     data_group = database_cursor.fetchall()
     data_cleaned = []
 
     for item in data_group:
         id, measure_time, height = item
-        time_object = time.strftime("%b %d %Y %H:%M:%S",
-                    time.strptime(measure_time, '%Y-%m-%d %H:%M:%S')
+        time_object = time.strftime("%b %d %Y %H:%M",
+                    time.strptime(measure_time, '%Y-%m-%d %H:%M')
         )
         measure_time = time_object
         data_cleaned.append([id, measure_time, height])
