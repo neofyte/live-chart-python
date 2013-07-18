@@ -1,27 +1,27 @@
 import os, sqlite3, time
 from datetime import datetime
 
-#a little bigger than the size of a line in the csv
+# read 10 lines from the bottom with size of 24 each
 READ_LINENO = 10
 READ_SIZE = READ_LINENO*24
 
 READ_INTERVAL = 300
 
-#dbname
-DATABASENAME = 'poolheight'
+# dbname
+DATABASENAME = 'cistern_water_depth'
 
-#the database path
-DBPATH = os.path.abspath(''.join([DATABASENAME, '.db']))
+# the app path
+APP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-#the csv file path
-FILEPATH = os.path.abspath('A___2SPL.csv')
+# the database path
+DB_PATH = os.path.abspath(''.join([APP_PATH, '\\data\\', DATABASENAME, '.db']))
 
-#if there exists multiple tables, these statements should be modified to funcitons
-#db insert statement
+# if there exists multiple tables, these statements should be modified to funcitons
+# db insert statement
 def insert_statement(table_name):
     return 'INSERT INTO {0} (datetime, height) VALUES (?,?)'.format(table_name)
 
-#db create table statement
+# db create table statement
 def create_statement(table_name):
     return 'CREATE TABLE {0} \
         id integer primary key autoincrement, datetime text, height real'\
@@ -47,15 +47,16 @@ class database_writer:
     to the database.
     '''
 
-    def __init__(self, file_name):
+    def __init__(self, file_name, file_path):
 
         '''
         establish the connection to the database
         '''
         
-        self.db_conn = sqlite3.connect(DBPATH)
+        self.db_conn = sqlite3.connect(DB_PATH)
         self.cursor_object = self.db_conn.cursor()
         self.file_name = file_name
+        self.file_path = file_path
         self.table_name = table_name_generator(file_name)
 
     def csvfile_reader(self):
@@ -66,20 +67,23 @@ class database_writer:
         output the cleaned data
         '''
 
-        file_name = self.file_name
+        file_path = self.file_path
         last_lines_cleaned = []
 
-        with open(file_name, 'rb') as csvfile:
+        with open(file_path, 'rb') as csvfile:
             csvfile.seek(-READ_SIZE,2)
             #last line eg. 18/04/2013 13:28,178.301
             bottom_lines = csvfile.read(READ_SIZE)
             last_lines = bottom_lines.split(b'\r\n')
             for i in range(1, READ_LINENO+1):
-                measure_time, height = last_lines[i].split(b',')
-                #datetime object eg. datetime.datetime(2013, 4, 18, 13, 28)
-                time_cleaned = datetime.strptime(measure_time.decode('utf-8'), '%d/%m/%Y %H:%M')
-                height_cleaned = height.decode('utf-8')
-                last_lines_cleaned.append((time_cleaned, height_cleaned))
+                if last_lines[i] != b'':
+                    measure_time, height = last_lines[i].split(b',')
+                    #datetime object eg. datetime.datetime(2013, 4, 18, 13, 28)
+                    time_cleaned = datetime.strptime(measure_time.decode('utf-8'), '%d/%m/%Y %H:%M')
+                    height_cleaned = height.decode('utf-8')
+                    last_lines_cleaned.append((time_cleaned, height_cleaned))
+                else:
+                    continue
             return last_lines_cleaned
 
 
@@ -131,9 +135,3 @@ class database_writer:
         #except:
             #cursor_object.close()
         print('stop')
-
-        
-if __name__=='__main__':
-
-    writer_instance = database_writer('A___2SPL.csv')
-    writer_instance.db_writer()

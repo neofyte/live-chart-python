@@ -5,7 +5,7 @@ import sqlite3
 #to initialize the database
 #for more tables or other options, modify the schema.sql
 with open('schema.sql', 'r') as f:
-	conn = sqlite3.connect('poolheight.db')
+	conn = sqlite3.connect('cistern_water_depth.db')
 	c = conn.cursor()
 	c.executescript(f.read())
 	conn.commit()

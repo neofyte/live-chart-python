@@ -7,6 +7,8 @@ import os
 import win32file
 import win32con
 
+import data_factory
+
 ACTIONS = {
     1 : "Created",
     2 : "Deleted",
@@ -17,9 +19,12 @@ ACTIONS = {
 # Thanks to Claudio Grondi for the correct set of numbers
 FILE_LIST_DIRECTORY = 0x0001
 
-path_to_watch = "."
+APP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+PATH_TO_WATCH = os.path.join(APP_PATH, 'data\\csv')
+
 hDir = win32file.CreateFile (
-    path_to_watch,
+    PATH_TO_WATCH,
     FILE_LIST_DIRECTORY,
     win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE | win32con.FILE_SHARE_DELETE,
     None,
@@ -27,7 +32,12 @@ hDir = win32file.CreateFile (
     win32con.FILE_FLAG_BACKUP_SEMANTICS,
     None
 )
+
+
 while True:
+
+    data_trans = {}
+
     #
     # ReadDirectoryChangesW takes a previously-created
     # handle to a directory, a buffer size for results,
@@ -45,7 +55,7 @@ while True:
         hDir,
         1024,
         True,
-        #win32con.FILE_NOTIFY_CHANGE_FILE_NAME |
+         #win32con.FILE_NOTIFY_CHANGE_FILE_NAME |
          #win32con.FILE_NOTIFY_CHANGE_DIR_NAME |
          #win32con.FILE_NOTIFY_CHANGE_ATTRIBUTES |
          #win32con.FILE_NOTIFY_CHANGE_SIZE |
@@ -54,6 +64,11 @@ while True:
         None,
         None
     )
-    for action, file in results:
-        full_filename = os.path.join (path_to_watch, file)
-        print (file, action, ACTIONS.get (action, "Unknown"))
+
+    for action, file_name in results:
+        file_path = os.path.join(PATH_TO_WATCH, file_name)
+        data_trans['file_name'] = data_factory.database_writer(file_name=file_name, file_path=file_path)
+        data_trans['file_name'].db_writer()
+        print (file_name, action)
+
+    del data_trans

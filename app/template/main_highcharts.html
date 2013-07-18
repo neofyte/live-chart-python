@@ -34,17 +34,6 @@ $(function () {
                 marginRight: 10,
                 events: {
                     load: requestData
-
-                    /*function() {
-    
-                        // set up the updating of the chart each second
-                        var series = this.series[0];
-                        setInterval(function() {
-                            var x = (new Date()).getTime(), // current time
-                                y = Math.random();
-                            series.addPoint([x, y], true, true);
-                        }, 1000);
-                    }*/
                 }
             },
             title: {
@@ -89,23 +78,9 @@ $(function () {
                 enabled: false
             },
             series: [{
-                name: 'first pool data',
+                name: '3 North',
                 data: [],
                 showInLegend: false
-                /*(function() {
-                    // generate an array of random data
-                    var data = [],
-                        time = (new Date()).getTime(),
-                        i;
-    
-                    for (i = -19; i <= 0; i++) {
-                        data.push({
-                            x: time + i * 1000,
-                            y: Math.random()
-                        });
-                    }
-                    return data;
-                })()*/
             }]
         });
 
@@ -113,7 +88,7 @@ $(function () {
 
 function requestData() {
     $.get(
-        '/data',
+        '/data/A___2NPL',
         function(group_data) {
 
             var point;

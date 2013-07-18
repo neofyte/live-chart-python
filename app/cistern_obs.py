@@ -1,9 +1,13 @@
 import sqlite3, os, json, time
 from datetime import datetime
-from flask import Flask, request, g, redirect, url_for, abort, render_template, flash, make_response
+from flask import Flask, request, g, redirect, url_for, abort, render_template, flash, make_response, abort
 
-DATABASE='data/poolheight.db'
+from util import data_factory
+
+DATABASE = data_factory.DB_PATH
 DEBUG=True
+
+TABLE_NAME_LIST=['A___2NPL', 'A___2SPL']
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template')
 
@@ -39,13 +43,21 @@ def db_query(table_name):
 def main():
     return render_template('main_highcharts.html')
 
-@app.route('/data')
+@app.route('/data/<table_name>')
 def data_push():
     if request.method == 'GET':
-        data = db_query()
-        response = make_response(json.dumps(data))
-        response.content_type = 'application/json'
-        return response
+        if table_name in TABLE_NAME_LIST:
+            data = db_query(table_name)
+            response = make_response(json.dumps(data))
+            response.content_type = 'application/json'
+            return response
+    else:
+        abort(404)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
