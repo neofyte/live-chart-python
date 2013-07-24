@@ -44,7 +44,7 @@ def main():
     return render_template('main_highcharts.html')
 
 @app.route('/data/<table_name>')
-def data_push():
+def data_push(table_name):
     if request.method == 'GET':
         if table_name in TABLE_NAME_LIST:
             data = db_query(table_name)

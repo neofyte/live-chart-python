@@ -3,9 +3,15 @@
 <head>
 <title>high</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="/static/hightchart_js/jquery.js"></script>
-    <script type="text/javascript" src="/static/hightchart_js/highcharts.js"></script>
-    <script type="text/javascript" src="/static/hightchart_js/gray.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js"></script>
+<![endif]-->
+<!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
+<!--<![endif]-->
+    
+    <script type="text/javascript" src="/static/js/highcharts.js"></script>
+    <script type="text/javascript" src="/static/js/gray.js"></script>
 
 </head>
 
@@ -16,115 +22,223 @@
 
     </div>
     <script type="text/javascript">
-$(function () {
-    var chart3N;
-    $(document).ready(function() {
-        Highcharts.setOptions({
-            global: {
-                useUTC: true
-            }
-        });
-    
-
-        chart3N = new Highcharts.Chart({
-            chart: {
-                renderTo: 'container',
-                defaultSeriesType: 'spline',
-                animation: Highcharts.svg, // don't animate in old IE
-                marginRight: 10,
-                events: {
-                    load: requestData
+    $(function () {
+        var chart3S;
+        $(document).ready(function() {
+            Highcharts.setOptions({
+                global: {
+                    useUTC: true
                 }
-            },
-            title: {
-                text: 'Live Height data'
-            },
-            xAxis: {
-                type: 'datetime',
-                //dateTimeLabelFormats: '%H:%M:%S',//%Y-%m-%d 
-                tickPixelInterval: 150,
-                labels: {
-                            formatter: function() {
-                            return Highcharts.dateFormat('%H:%M:%S', this.value);//%Y-%m-%d 
-                            },
-                            rotation: -45,
-                            align: 'right',
-                        },
-            },
-            yAxis: {
-                min:0,
-                max:300,
-                title: {
-                    text: 'Value'
+            });
+        
+
+            chart3S = new Highcharts.Chart({
+                chart: {
+                    renderTo: '3np',
+                    defaultSeriesType: 'spline',
+                    animation: Highcharts.svg, // don't animate in old IE
+                    marginRight: 10,
+                    events: {
+                        load: requestData
+                    }
                 },
-                plotLines: [{
-                    value: 200,
-                    width: 1,
-                    color: '#808080'
+                title: {
+                    text: '2# South data'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    //dateTimeLabelFormats: '%H:%M:%S',//%Y-%m-%d 
+                    tickPixelInterval: 150,
+                    labels: {
+                                formatter: function() {
+                                return Highcharts.dateFormat('%H:%M:%S', this.value);//%Y-%m-%d 
+                                },
+                                rotation: -45,
+                                align: 'right'
+                            }
+                },
+                yAxis: {
+                    min:0,
+                    max:300,
+                    title: {
+                        text: 'Value'
+                    },
+                    plotLines: [{
+                        value: 200,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                
+                tooltip: {
+                    formatter: function() {
+                            return '<b>'+ this.series.name +'</b><br/>'+
+                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
+                            Highcharts.numberFormat(this.y, 2);
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                exporting: {
+                    enabled: false
+                },
+                series: [{
+                    name: '3 North',
+                    data: [],
+                    showInLegend: false
                 }]
-            },
-            
-            tooltip: {
-                formatter: function() {
-                        return '<b>'+ this.series.name +'</b><br/>'+
-                        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
-                        Highcharts.numberFormat(this.y, 2);
+            });
+
+
+
+    function requestData() {
+        $.get(
+            '/data/A___2NPL',
+            function(group_data) {
+
+                var point;
+                for (var i =  group_data.length-1; i >=0; i--) {
+                    point = group_data[i];
+                
+                var series = chart3S.series[0],
+                    shift = series.data.length > 8; // shift if the series is longer than 10
+
+                var date = new Date(point[1]);
+                //date.setHours(date.getHours()+8);
+                // Get the offset in ms
+                var offset = date.getTimezoneOffset()*60000;
+                var dateCleaned = date.setTime(date.getTime()-offset);
+                var height = point[2];
+                var dot = [dateCleaned, height];
+
+                // add the point
+                chart3S.series[0].addPoint(dot, true, shift);
+                console.log(point[1],Highcharts.dateFormat('%H:%M:%S', date));
+                console.log(dot);
+
+                };
+                
+                // call it again after one second 1000
+                setTimeout(requestData, 30000);    
+            }
+        );
+    }
+
+
+        });//document ready
+        
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        var chart3S;
+        $(document).ready(function() {
+            Highcharts.setOptions({
+                global: {
+                    useUTC: true
                 }
-            },
-            legend: {
-                enabled: false
-            },
-            exporting: {
-                enabled: false
-            },
-            series: [{
-                name: '3 North',
-                data: [],
-                showInLegend: false
-            }]
-        });
+            });
+        
+
+            chart3S = new Highcharts.Chart({
+                chart: {
+                    renderTo: '3sp',
+                    defaultSeriesType: 'spline',
+                    animation: Highcharts.svg, // don't animate in old IE
+                    marginRight: 10,
+                    events: {
+                        load: requestData
+                    }
+                },
+                title: {
+                    text: '2# South data'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    //dateTimeLabelFormats: '%H:%M:%S',//%Y-%m-%d 
+                    tickPixelInterval: 150,
+                    labels: {
+                                formatter: function() {
+                                return Highcharts.dateFormat('%H:%M:%S', this.value);//%Y-%m-%d 
+                                },
+                                rotation: -45,
+                                align: 'right'
+                            }
+                },
+                yAxis: {
+                    min:0,
+                    max:300,
+                    title: {
+                        text: 'Value'
+                    },
+                    plotLines: [{
+                        value: 200,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                
+                tooltip: {
+                    formatter: function() {
+                            return '<b>'+ this.series.name +'</b><br/>'+
+                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
+                            Highcharts.numberFormat(this.y, 2);
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                exporting: {
+                    enabled: false
+                },
+                series: [{
+                    name: '3 North',
+                    data: [],
+                    showInLegend: false
+                }]
+            });
 
 
 
-function requestData() {
-    $.get(
-        '/data/A___2NPL',
-        function(group_data) {
+    function requestData() {
+        $.get(
+            '/data/A___2SPL',
+            function(group_data) {
 
-            var point;
-            for (var i =  group_data.length-1; i >=0; i--) {
-                point = group_data[i];
-            
-            var series = chart3N.series[0],
-                shift = series.data.length > 8; // shift if the series is longer than 10
+                var point;
+                for (var i =  group_data.length-1; i >=0; i--) {
+                    point = group_data[i];
+                
+                var series = chart3S.series[0],
+                    shift = series.data.length > 8; // shift if the series is longer than 10
 
-            var date = new Date(point[1]);
-            //date.setHours(date.getHours()+8);
-            // Get the offset in ms
-            var offset = date.getTimezoneOffset()*60000;
-            var dateCleaned = date.setTime(date.getTime()-offset);
-            var height = point[2];
-            var dot = [dateCleaned, height];
+                var date = new Date(point[1]);
+                //date.setHours(date.getHours()+8);
+                // Get the offset in ms
+                var offset = date.getTimezoneOffset()*60000;
+                var dateCleaned = date.setTime(date.getTime()-offset);
+                var height = point[2];
+                var dot = [dateCleaned, height];
 
-            // add the point
-            chart3N.series[0].addPoint(dot, true, shift);
-            console.log(point[1],Highcharts.dateFormat('%H:%M:%S', date));
-            console.log(dot);
+                // add the point
+                chart3S.series[0].addPoint(dot, true, shift);
+                console.log(point[1],Highcharts.dateFormat('%H:%M:%S', date));
+                console.log(dot);
 
-            };
-            
-            // call it again after one second 1000
-            setTimeout(requestData, 30000);    
-        }
-    );
-}
-
-
-    });//document ready
-    
-});
+                };
+                
+                // call it again after one second 1000
+                setTimeout(requestData, 30000);    
+            }
+        );
+    }
 
 
+        });//document ready
+        
+    });
     </script>
 
 </body>
